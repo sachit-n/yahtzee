@@ -57,71 +57,11 @@ public class SaveServer extends JFrame {
 
 		       // Read from input
 		       Object object = inputFromClient.readObject();
-		       if (object.equals(1)) {
-		    	   wordsBox.append("Sending saved games to client...\n");
-			       ObjectOutputStream toServer =
-			    	          new ObjectOutputStream(socket.getOutputStream());
-			      
-					try {
-						conn = DriverManager.getConnection("jdbc:sqlite:yahtzee.db");
-						qryGames = conn.prepareStatement("Select * from saveGames order by timeStamp DESC;");
-				        ResultSet rset = qryGames.executeQuery();
-				        ResultSetMetaData rsmd = rset.getMetaData();
-				        int numColumns = rsmd.getColumnCount();
-				        String rowString = "";
-				        String[] idArray = new String[10];
-				        String[] playerNameArray = new String[10];
-				        String[] timeStampArray = new String[10];
-				        int j=0;
-				        while(rset.next()) {
-				        	if (j>9) {
-				        		break;
-				        	}
-				        	Object o1 = rset.getObject(1);
-				        	idArray[j] = o1.toString();
-				        	Object o2 = rset.getObject(2);
-				        	timeStampArray[j] = o2.toString();
-				        	Object o3 = rset.getObject(3);
-				        	playerNameArray[j] = o3.toString();	
-				        	wordsBox.append("Sending Game to Client. Player Name: " + playerNameArray[j] + " Timestamp: " + timeStampArray[j] + '\n');
-				        	j += 1;
-				        }
-				        
-				        String[][] data = new String[10][3];
-				        data[0] = idArray;
-				        data[1] = playerNameArray;
-				        data[2] = timeStampArray;
-				  
-				        toServer.writeObject(data);
-				
-				        
-				        wordsBox.append("Recieving chosen game from client...\n");
-					       inputFromClient2 =
-					         new ObjectInputStream(socket.getInputStream());
-
-					       // Read from input
-					       Object object2 = inputFromClient2.readObject();
-					       String gmeId = (String)object2;
-					       wordsBox.append("Recieved Game ID - " + gmeId + '\n');
-					       if(gmeId!=null) {
-						       qryGame = conn.prepareStatement("Select * from saveGames where ID=?");
-						       qryGame.setString(1, gmeId);
-						       ResultSet rset2 = qryGame.executeQuery();
-						       
-						       ObjectOutputStream toServer2 =
-						    	          new ObjectOutputStream(socket.getOutputStream());
-						       toServer2.writeObject(rset2);
-					       }
-	
-
-					}
-					catch (SQLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+		       if (object.equals("Load Request")) {
+		    	   // ToDo - Load Feature 
 					 }
 		       else {
-		       // Write to the file
+		       // Received Save Request. Client sent game object. 
 		       yahtzeeGame = (YahtzeeGame)object;
 		       wordsBox.append("Recieved game state from client. Now saving to SQL\n");
 		       saveToSQL();
